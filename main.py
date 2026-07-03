@@ -1,39 +1,26 @@
-from winrt.windows.devices.geolocation import Geolocator, PositionAccuracy
-from geopy.distance import geodesic
-from datetime import timedelta
 from time import sleep
+from philh_myftp_biz.pc import Path
+from philh_myftp_biz.time import now
+from philh_myftp_biz import gps
 
-#======================================================
-
-records: list[dict] = []
-
+records = Path(f'records-{now().unix}.json').JSON.List
+records.save([])
 
 while True:
-
-    gl = Geolocator()
-    gl.desired_accuracy = PositionAccuracy.HIGH
-
-    pos = gl.get_geoposition_async_with_age_and_timeout(
-        timedelta(seconds=0), # Max Age
-        timedelta(seconds=15) # Timeout
-    ).get().coordinate
-
-    records += [{
-        'coords': [
-            pos.latitude,
-            pos.longitude
-        ],
-        'ping': -1
-    }]
     
-    dist = geodesic(
-        records[0]['coords'],
-        records[-1]['coords']
-    ).meters
+    pos = gps.fetch()
 
-    print()
-    print(f'{records[0]['coords']=}')
-    print(f'{records[-1]['coords']=}')
-    print(f"Distance: {dist:f} m")
+    record = {
+        'coords': pos,
+        'ping': -1
+    }
+
+    frecord: dict = records[-1] if records.read() else record
+    record['dist'] = (pos - frecord['coords']).meters
+
+    print(record)
+    
+    if record not in records.read():
+        records += record
 
     sleep(1)
