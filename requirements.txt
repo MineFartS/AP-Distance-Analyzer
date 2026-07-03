@@ -1,0 +1,2 @@
+winrt-Windows.Devices.Geolocation
+winrt-Windows.Foundation
