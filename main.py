@@ -1,7 +1,9 @@
-from time import sleep
-from philh_myftp_biz.pc import Path
 from philh_myftp_biz.time import now
+from philh_myftp_biz.pc import Path
+from philh_myftp_biz.web import IP
 from philh_myftp_biz import gps
+from time import sleep
+from ping3 import ping
 
 records = Path(f'records-{now().unix}.json').JSON.List
 records.save([])
@@ -12,7 +14,8 @@ while True:
 
     record = {
         'coords': pos,
-        'ping': -1
+        'dist': None,
+        'ping': ping(IP.ROUTER) or -1
     }
 
     frecord: dict = records[-1] if records.read() else record
